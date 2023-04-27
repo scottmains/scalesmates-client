@@ -1,0 +1,39 @@
+.profile-dropdown-wrapper {
+  position: absolute;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  right: 0;
+  top: 60px; /* Adjust as necessary */
+}
+
+.profile-menu {
+  width: 100px;
+  position: absolute;
+
+}
+
+.profile-icon {
+  position: relative;
+  z-index: 1;
+  right: 40px;
+}
+
+.profile-dropdown-wrapper ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: white;
+ 
+}
+
+.profile-dropdown-wrapper li {
+  color: var(--background);
+  display: block;
+  text-align: center;
+}
+
+.profile-dropdown-wrapper .profile-menu ul li a {
+  text-decoration: none;
+  color: black;
+}

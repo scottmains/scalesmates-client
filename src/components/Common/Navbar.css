@@ -1,0 +1,46 @@
+.main-header {
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  height: 60px; /* Reduce the height */
+}
+
+.nav-wrapper {
+  display: flex;
+  justify-content: center;
+  top: 0;
+  height: 100%; /* Add height property */
+}
+
+nav.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 750px;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  position: relative;
+  height: 100%; /* Add height property */
+}
+
+.search {
+  background-color: transparent;
+  border: none;
+  cursor: pointer; /* Add cursor property */
+  color:black;
+}
+
+.logo {
+  text-align: center;
+  height: 100%; /* Add height property */
+  display: flex; /* Add display property */
+  align-items: center; /* Add align-items property */
+}
+
+.logo img {
+  height: 40px;
+  /* Adjust the logo size as necessary */
+}

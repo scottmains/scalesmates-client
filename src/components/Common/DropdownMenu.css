@@ -1,0 +1,50 @@
+.dropdown-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+}
+
+.menu {
+
+  width: 200px;
+  position: absolute;
+  top: calc(100% + -10px);
+  /* Adjust the position of the dropdown menu */
+}
+
+.hamburger-menu {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  color: black;
+}
+
+.dropdown-wrapper ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: white;
+
+}
+
+.dropdown-wrapper li {
+  color: var(--background);
+  display: block;
+
+}
+
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+
+}
+
+.dropdown-wrapper .menu ul li a {
+  text-decoration: none;
+  color: black;
+}
