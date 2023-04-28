@@ -1,62 +1,62 @@
 import React, { useState } from 'react';
-import { addWeightGoal } from "../../services/weightService";
 import { getToken } from '../../services/authService';
+import { logMeal } from '../../services/calorieIntakeService';
+import { NewMeal } from '../../interfaces/CalorieInterfaces';
 
-interface GoalWeightModalProps {
+interface LogMealModalProps {
   onClose: () => void;
+  onMealLogged: () => void;
+  dailyCalorieIntakeId: number;
 }
 
-const GoalWeightModal: React.FC<GoalWeightModalProps> = ({ onClose }) => {
+const LogMealModal: React.FC<LogMealModalProps> = ({ onClose, onMealLogged, dailyCalorieIntakeId }) => {
   const token = getToken();
-  const [goalWeight, setGoalWeight] = useState<number>();
-  const [targetDate, setTargetDate] = useState(new Date().toISOString());
+  const [mealName, setMealName] = useState<string>();
+  const [mealCalories, setMealCalories] = useState<number>();
 
-  const handleAddWeightGoal = async (e: React.FormEvent) => {
+  const handleLogMeal = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!token) return;
-      await addWeightGoal(token, goalWeight!, targetDate!);
+      if (!token || !mealName || !mealCalories) return;
+      const meal: NewMeal = {
+        dailyCalorieIntakeId: dailyCalorieIntakeId,
+        name: mealName,
+        calories: mealCalories,  
+      };
+      await logMeal(token, meal);
+      onMealLogged(); // Trigger data refetching
       onClose();
     } catch (error) {
-      console.error('Error adding weight:', error);
+      console.error("Error adding meal:", error);
     }
   };
 
-  const currentDate = new Date();
-  const currentDatetime = new Date(
-  currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
-).toISOString()
-  .slice(0, 16)
-  .replace('T', ' ');
-  
   return (
     <div className="fixed z-10 inset-0 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
         <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
-          <h1 className="text-2xl font-bold mb-2">Set Goal Weight</h1>
-          <form onSubmit={handleAddWeightGoal}>
+          <h1 className="text-2xl font-bold mb-2">Log Meal</h1>
+          <form onSubmit={handleLogMeal}>
             <div className="mb-4">
               <label className="block text-gray-700 font-bold mb-2">
-                Goal Weight (kg):
+                Name of Meal:
               </label>
               <input
-                type="number"
+                type="string"
                 step="0.01"
-                defaultValue={currentDatetime}
-                onChange={(e) => setGoalWeight(parseFloat(e.target.value))}
+                onChange={(e) => setMealName((e.target.value))}
                 className="w-full p-2 mt-4 border rounded"
                 required
               />
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 font-bold mb-2">
-                Target Date:
+                Amount of calories:
               </label>
               <input
-                type="date"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
+                type="number"
+                onChange={(e) => setMealCalories(parseInt(e.target.value))}
                 className="w-full p-2 mt-4 border rounded"
                 required
               />
@@ -74,4 +74,4 @@ const GoalWeightModal: React.FC<GoalWeightModalProps> = ({ onClose }) => {
   );
 };
 
-export default GoalWeightModal;
+export default LogMealModal;

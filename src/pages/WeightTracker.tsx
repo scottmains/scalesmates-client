@@ -17,7 +17,7 @@ const WeightTracker: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [latestWeightDate, setLatestWeightDate] = useState<Date | null>(null);
-  const activeGoals = useActiveGoals(token);
+  const activeGoal = useActiveGoals(token);
 
 
   const openModal = () => {
@@ -30,8 +30,8 @@ const WeightTracker: React.FC = () => {
   };
 
   const latestWeight = weights.length > 0 ? weights[0].weight : 0;
-  const goalWeight = activeGoals.length > 0 ? activeGoals[0].goalWeight : 0;
-
+  const goalWeight = activeGoal?.goalWeight ?? 0;
+  
   const weightDiff = weightDifference(latestWeight, goalWeight);
   const percentDiff = percentageDifference(latestWeight, goalWeight);
 

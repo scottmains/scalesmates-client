@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-
+import { getToken } from '../services/authService';
 interface UserContextType {
   isAuthenticated: boolean;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
@@ -27,12 +27,11 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+  const initialToken = getToken();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    !!localStorage.getItem("authToken")
+    initialToken !== null
   );
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("authToken")
-  );
+  const [token, setToken] = useState<string | null>(initialToken);
 
   const value = {
     isAuthenticated,

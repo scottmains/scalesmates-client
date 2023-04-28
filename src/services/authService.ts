@@ -1,8 +1,29 @@
+import jwt_decode from "jwt-decode";
+
 const API_URL = "https://localhost:7255";
 
 
+interface DecodedToken {
+  exp: number;
+}
+
 export function getToken(): string | null {
-    return localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
+  
+  if (!token) {
+    return null;
+  }
+
+  const decodedToken = jwt_decode(token) as DecodedToken;
+  const currentTime = Date.now() / 1000; // convert milliseconds to seconds
+
+  if (decodedToken.exp < currentTime) {
+    // Token is expired, remove it from localStorage
+    localStorage.removeItem("authToken");
+    return null;
+  }
+
+  return token;
   }
 
   export async function register(email: string, password: string, confirmPassword: string): Promise<void> {

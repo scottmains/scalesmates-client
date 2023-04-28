@@ -1,9 +1,7 @@
-import { WeightGoal, WeightRecord } from '../interfaces/WeightInterfaces';
+import { WeightRecord } from '../interfaces/WeightInterfaces';
 
 
 const API_URL = "https://localhost:7255"; // Replace with your API URL
-
-
 
 export async function fetchWeights(token: string): Promise<WeightRecord[]> {
   console.log("testing token ");
@@ -20,7 +18,7 @@ export async function fetchWeights(token: string): Promise<WeightRecord[]> {
   return await response.json();
 }
 
-export async function addWeight(token: string, weight: number, date: string): Promise<void> {
+export async function addWeight(token: string, weight: number, date: string): Promise<WeightRecord> {
  
     const response = await fetch(`${API_URL}/weight`, {
       method: "POST",
@@ -34,41 +32,11 @@ export async function addWeight(token: string, weight: number, date: string): Pr
     if (!response.ok) {
       throw new Error("Failed to add weight");
     }
+
+    return await response.json();
   }
 
-  export async function addWeightGoal(token: string, weight: number, date: string): Promise<void> {
- 
-    const response = await fetch(`${API_URL}/weight/creategoal`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({ GoalWeight: weight, TargetDate: date }),
-    });
-  
-    if (!response.ok) {
-      throw new Error("Failed to add weight");
-    }
-  }
 
-  export async function fetchActiveGoals(token: string): Promise<WeightGoal[]> {
-    const response = await fetch(`${API_URL}/weight/active`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-  
-    if (!response.ok) {
-      throw new Error("Failed to fetch active goals");
-    }
-  
-    const goals: WeightGoal[] = await response.json();
-    return goals;
-  }
-  
   export async function deleteWeight(token: string, id: number): Promise<void> {
     const response = await fetch(`${API_URL}/weight/${id}`, {
       method: "DELETE",

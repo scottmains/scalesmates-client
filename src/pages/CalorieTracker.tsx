@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { CalorieIntakeView } from "../components/CalorieManagement/CalorieIntakeView";
-import { CalorieBurnView } from "../components/CalorieManagement/CalorieBurnView";
-import { getCurrentDateBurn, getCurrentDateIntake, getOrCreateTodaysBurn, getOrCreateTodaysIntake } from "../services/calorieService";
+import CalorieIntakeView from "../components/CalorieIntakeManagement/CalorieIntakeView";
+import CalorieBurnView from "../components/CalorieBurnManagement/CalorieBurnView";
+import { getCurrentDateIntake, getOrCreateTodaysIntake } from "../services/calorieIntakeService";
+import { getCurrentDateBurn, getOrCreateTodaysBurn } from "../services/calorieBurnService";
 import { useUserContext } from "../context/UserContext";
+import { DailyCalorieBurn, DailyCalorieIntake } from "../interfaces/CalorieInterfaces";
+import { useActiveCalorieTarget } from "../hooks/useActiveCalorieTarget";
 
 const CalorieTracker: React.FC = () => {
-
   const [activeView, setActiveView] = useState("intake");
+  const [currentDateIntake, setCurrentDateIntake] = useState<DailyCalorieIntake | null>();
+  const [currentDateBurn, setCurrentDateBurn] = useState<DailyCalorieBurn | null>();
   const { token } = useUserContext();
+  const calorieTarget = useActiveCalorieTarget(token);
+  const [netCalories, setNetCalories] = useState<number>(0);
 
 
   useEffect(() => {
@@ -15,8 +21,9 @@ const CalorieTracker: React.FC = () => {
       if (token) {
         try {
           const currentDateIntake = await getCurrentDateIntake(token);
+          setCurrentDateIntake(currentDateIntake);
           const currentDateBurn = await getCurrentDateBurn(token);
-          console.log(currentDateIntake);
+          setCurrentDateBurn(currentDateBurn);
           if (!currentDateIntake) {
             await getOrCreateTodaysIntake(token);
           }
@@ -32,6 +39,29 @@ const CalorieTracker: React.FC = () => {
 
     initCalorieTracker();
   }, [token]);
+
+  useEffect(() => {
+    if (currentDateIntake && currentDateBurn) {
+      const newNetCalories =
+        (currentDateIntake.totalCalories || 0) -
+        (currentDateBurn.totalCalories || 0);
+      setNetCalories(Math.max(newNetCalories, 0));
+    }
+  }, [currentDateIntake, currentDateBurn]);
+
+  const remainingCalories = (calorieTarget?.targetCalories ?? 0) - netCalories;
+
+
+  const refreshCurrentDateIntake = async () => {
+    if (token) {
+      try {
+        const currentDateIntake = await getCurrentDateIntake(token);
+        setCurrentDateIntake(currentDateIntake);
+      } catch (error) {
+        console.error("Failed to refresh Calorie Intake", error);
+      }
+    }
+  };
 
   return (
     <div>
@@ -59,9 +89,26 @@ const CalorieTracker: React.FC = () => {
             Calorie Burn
           </button>
         </div>
+              
+        
       </div>
-      {activeView === "intake" && <CalorieIntakeView />}
-      {activeView === "burn" && <CalorieBurnView />}
+
+      <div>
+      {/* ... rest of the component code ... */}
+      {calorieTarget && (
+        <div className="mt-4 p-4 bg-blue-500 text-white rounded-md shadow-lg max-w-750px mx-auto text-center">
+          <p className="text-2xl font-semibold">
+            You are {remainingCalories} calories{" "}
+            {remainingCalories >= 0 ? "under" : "over"} your target of{" "}
+            {calorieTarget.targetCalories}.
+          </p>
+        </div>
+      )}
+    </div>
+      {activeView === "intake" && (
+        <CalorieIntakeView dailyIntake={currentDateIntake} onRefreshIntake={refreshCurrentDateIntake} />
+      )}
+      {activeView === "burn" && <CalorieBurnView dailyBurn={currentDateBurn} onRefreshIntake={refreshCurrentDateIntake}/>}
     </div>
   );
 };

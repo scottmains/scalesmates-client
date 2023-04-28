@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
-import GoalWeightModal from "../components/WeightManagement/GoalWeightModal";
+import GoalWeightModal from "../components/ProfileManagement/GoalWeightModal";
 import DateDisplay from "../components/Common/DateDisplay";
 import { useActiveGoals } from '../hooks/useActiveGoals';
+import { useActiveCalorieTarget } from "../hooks/useActiveCalorieTarget";
+import CalorieTargetModal from "../components/ProfileManagement/CalorieTargetModal";
 
 
 const ProfilePage: React.FC = () => {
   const { isAuthenticated } = useUserContext();
   const navigate = useNavigate();
 
-  const [showModal, setShowModal] = useState(false);
+  const [showGoalWeightModal, setShowGoalWeightModal] = useState(false);
+  const [showCalorieTargetModal, setShowCalorieTargetModal] = useState(false);
   const { token } = useUserContext();
-  const activeGoals = useActiveGoals(token);
-
+  const activeGoal = useActiveGoals(token);
+  const activeCalorieTarget = useActiveCalorieTarget(token);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,18 +32,14 @@ const ProfilePage: React.FC = () => {
       </div>
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h1 className="text-2xl font-bold mb-4">My Goal</h1>
-          {activeGoals ? (
+          {activeGoal ? (
             <>
               <p className="text-lg font-medium mb-4">
-              {activeGoals.map((goal) => (
-                  <div key={goal.id}>
-                    Goal Weight: {goal.goalWeight} | Target Date: <DateDisplay date={goal.targetDate}/>
-                  </div>
-                ))}
+              Your current goal is: {activeGoal.goalWeight} by <DateDisplay date={activeGoal.targetDate} />
               </p>
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => setShowModal(true)}
+                onClick={() => setShowGoalWeightModal(true)}
               >
                 Edit Goal
               </button>
@@ -52,7 +51,7 @@ const ProfilePage: React.FC = () => {
               </p>
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => setShowModal(true)}
+                onClick={() => setShowGoalWeightModal(true)}
               >
                 Set Goal
               </button>
@@ -60,12 +59,49 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
 
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold mb-4">My Calorie Target</h1>
+          {activeCalorieTarget ? (
+            <>
+              <p className="text-lg font-medium mb-4">
+              Your current calorie target is: {activeCalorieTarget?.targetCalories} 
+              </p>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => setShowCalorieTargetModal(true)}
+              >
+                Edit Target
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-lg font-medium mb-4">
+                You haven't set a calorie target yet.
+              </p>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => setShowCalorieTargetModal(true)}
+              >
+                Set Target
+              </button>
+            </>
+          )}
+        </div>
+
+
     
-      {showModal && (
+      {showGoalWeightModal && (
         <GoalWeightModal
-          onClose={() => setShowModal(false)}
+          onClose={() => setShowGoalWeightModal(false)}
         />
       )}
+
+{showCalorieTargetModal && (
+        <CalorieTargetModal
+          onClose={() => setShowCalorieTargetModal(false)}
+        />
+      )}
+
     </>
   );
 };

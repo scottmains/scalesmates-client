@@ -1,18 +1,4 @@
-export interface WeightRecord {
-    id: number;
-    weight: number;
-    date: string;
-    userId: string;
-  }
-  
-  export interface WeightGoal {
-    id: number;
-    goalWeight: number;
-    targetDate: string;
-    userId: string;
-    active: boolean;
-  }
-  
+
   export interface DailyCalorieIntake {
     id: number;
     totalCalories: number;
@@ -29,22 +15,36 @@ export interface WeightRecord {
   
   export interface Meal {
     id: number;
+    dailyCalorieIntakeId: number;
     name: string;
     calories: number;
+    
+  }
+
+  export interface NewMeal {
     dailyCalorieIntakeId: number;
+    name: string;
+    calories: number;
   }
   
   export interface PhysicalActivity {
     id: number;
     name: string;
+    calories: number;
+    dailyCalorieBurnId: number;
+    steps?: number;
+  }
+
+  export interface NewPhysicalActivity {
+    name: string;
     caloriesBurned: number;
     dailyCalorieBurnId: number;
+    steps?: number;
   }
   
   export interface CalorieTarget {
     id: number;
     targetCalories: number;
-    date: string;
     userId: string;
   }
   

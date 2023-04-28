@@ -1,6 +1,6 @@
 import React from 'react';
 import WeightRecordCard from './WeightRecordCard';
-import { WeightRecord } from '../interfaces/WeightInterfaces';
+import { WeightRecord } from '../../interfaces/WeightInterfaces';
 
 interface WeightListProps {
   weights: WeightRecord[];
