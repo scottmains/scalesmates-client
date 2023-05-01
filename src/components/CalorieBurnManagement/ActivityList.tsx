@@ -3,19 +3,21 @@ import { deleteMeal } from "../../services/calorieIntakeService";
 import {  PhysicalActivity } from "../../interfaces/CalorieInterfaces";
 import { getToken } from "../../services/authService";
 import { MdDelete } from 'react-icons/md';
+import { deleteActivity } from "../../services/calorieBurnService";
 
 interface ActivityListProps {
   activities: PhysicalActivity[];
-  dailyCalorieIntakeId: number;
+  dailyCalorieBurnId: number;
   onActivityDeleted: () => void;
 }
 
-const ActivityList: React.FC<ActivityListProps> = ({ activities, dailyCalorieIntakeId, onActivityDeleted }) => {
+const ActivityList: React.FC<ActivityListProps> = ({ activities, dailyCalorieBurnId, onActivityDeleted }) => {
   const token = getToken();
 
   const handleDeleteActivity = async (activityId: number) => {
+    console.log(dailyCalorieBurnId)
     if (token) {
-      await deleteMeal(token, activityId, dailyCalorieIntakeId);
+      await deleteActivity(token, activityId, dailyCalorieBurnId);
       onActivityDeleted();
     }
   };

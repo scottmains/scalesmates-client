@@ -21,8 +21,8 @@ const MealList: React.FC<MealListProps> = ({ meals, dailyCalorieIntakeId, onMeal
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <h3 className="text-2xl font-bold mb-4">Meals</h3>
+    <div className="bg-pastel-purple-light p-4 rounded-lg shadow-md">
+      <h3 className="text-2xl font-bold text-pastel-purple mb-4">Meals</h3>
       <ul>
         {meals.map((meal) => (
           <li key={meal.id} className="flex justify-between items-center mb-2">
@@ -30,7 +30,7 @@ const MealList: React.FC<MealListProps> = ({ meals, dailyCalorieIntakeId, onMeal
               <span className="font-bold">{meal.name}</span> - {meal.calories} calories
             </div>
             <button
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded inline-flex items-center"
+              className="bg-pastel-pink hover:bg-pastel-pink-dark text-white font-bold py-1 px-2 rounded inline-flex items-center"
               onClick={() => handleDeleteMeal(meal.id)}
             >
               <MdDelete />

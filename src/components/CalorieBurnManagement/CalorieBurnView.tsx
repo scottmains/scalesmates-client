@@ -64,7 +64,7 @@ interface CalorieBurnProps {
               )}
               <ActivityList
                 activities={activities}
-                dailyCalorieIntakeId={dailyBurn.id}
+                dailyCalorieBurnId={dailyBurn.id}
                 onActivityDeleted={onActivityDeleted}
               />
             </>

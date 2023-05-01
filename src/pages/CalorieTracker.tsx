@@ -17,28 +17,31 @@ const CalorieTracker: React.FC = () => {
 
 
   useEffect(() => {
-    async function initCalorieTracker() {
+    async function fetchAndSetData() {
       if (token) {
-        try {
-          const currentDateIntake = await getCurrentDateIntake(token);
-          setCurrentDateIntake(currentDateIntake);
-          const currentDateBurn = await getCurrentDateBurn(token);
-          setCurrentDateBurn(currentDateBurn);
-          if (!currentDateIntake) {
-            await getOrCreateTodaysIntake(token);
-          }
-
-          if (!currentDateBurn) {
-            await getOrCreateTodaysBurn(token);
-          }
-        } catch (error) {
-          console.error("Failed to initialize Calorie Tracker", error);
+        const [intakeData, burnData] = await Promise.all([
+          getCurrentDateIntake(token),
+          getCurrentDateBurn(token),
+        ]);
+  
+        setCurrentDateIntake(intakeData);
+        setCurrentDateBurn(burnData);
+  
+        if (!intakeData) {
+          const todaysIntake = await getOrCreateTodaysIntake(token);
+          setCurrentDateIntake(todaysIntake);
+        }
+  
+        if (!burnData) {
+          const todaysBurn = await getOrCreateTodaysBurn(token);
+          setCurrentDateBurn(todaysBurn);
         }
       }
     }
-
-    initCalorieTracker();
+  
+    fetchAndSetData();
   }, [token]);
+  
 
   useEffect(() => {
     if (currentDateIntake && currentDateBurn) {
@@ -89,12 +92,9 @@ const CalorieTracker: React.FC = () => {
             Calorie Burn
           </button>
         </div>
-              
-        
       </div>
 
       <div>
-      {/* ... rest of the component code ... */}
       {calorieTarget && (
         <div className="mt-4 p-4 bg-blue-500 text-white rounded-md shadow-lg max-w-750px mx-auto text-center">
           <p className="text-2xl font-semibold">

@@ -19,8 +19,8 @@ export async function getAllBurns(token: string): Promise<DailyCalorieBurn[]> {
   return await response.json();
 }
 
-export async function getOrCreateTodaysBurn(token: string, date: Date): Promise<DailyCalorieBurn> {
-    const response = await fetch(`${API_URL}/CalorieBurn/today`, {
+export async function getOrCreateTodaysBurn(token: string): Promise<DailyCalorieBurn> {
+    const response = await fetch(`${API_URL}/CalorieBurn/date`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -44,7 +44,6 @@ export async function getOrCreateTodaysBurn(token: string, date: Date): Promise<
         "Authorization": `Bearer ${token}`,
       },
     });
-  
     if (response.status === 204) {
       return null;
     }
@@ -52,7 +51,6 @@ export async function getOrCreateTodaysBurn(token: string, date: Date): Promise<
     if (!response.ok) {
       throw new Error(`Failed to get current date burn. Status: ${response.status}, StatusText: ${response.statusText}`);
     }
-  
     const burn: DailyCalorieBurn = await response.json();
     return burn;
   }
@@ -90,8 +88,9 @@ export async function getActivitiesForDailyBurn(token: string, dailyCalorieBurnI
   return await response.json();
 }
 
-export async function deleteActivity(token: string, id: number): Promise<void> {
-const response = await fetch(`${API_URL}/CalorieBurn/activity/${id}`, {
+export async function deleteActivity(token: string, id: number, burnId: number): Promise<void> {
+  console.log(burnId);
+const response = await fetch(`${API_URL}/CalorieBurn/activity/${id}?burnId=${burnId}`, {
   method: "DELETE",
   headers: {
     "Content-Type": "application/json",
