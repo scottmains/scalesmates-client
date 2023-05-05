@@ -3,8 +3,8 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./ProfileDropdownMenu.css";
 import { motion, Variants } from "framer-motion";
 import { FaUserAlt } from "react-icons/fa";
-import { useUserContext } from '../../context/UserContext';
-
+import { setIsAuthenticated, setToken } from "../../store/reducers/user";
+import { useDispatch } from 'react-redux'; // Add this import
 
 type DropdownMenuProps = {};
 
@@ -20,25 +20,25 @@ const itemVariants: Variants = {
 const ProfileDropdownMenu: React.FC<DropdownMenuProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { setIsAuthenticated } = useUserContext();
   const navigate = useNavigate();
-  
+  const dispatch = useDispatch();
+
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
 
 
   const handleLogout = () => {
-  
     localStorage.removeItem('authToken');
-    setIsAuthenticated(false);
+    dispatch(setIsAuthenticated(false)); // Dispatch setIsAuthenticated action
+    dispatch(setToken(null)); // Dispatch setToken action
     navigate('/');
   };
+
 
   return (
     <div className="profile-dropdown-wrapper">
       <motion.div initial={false} animate={isOpen ? "open" : "closed"} className="profile-menu">
-
       <FaUserAlt className="profile-icon" size={24} whiletap={{ scale: 0.97 }} onClick={() => setIsOpen(!isOpen)} />
 
         <motion.ul

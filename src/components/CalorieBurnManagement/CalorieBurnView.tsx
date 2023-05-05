@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { DailyCalorieIntake, PhysicalActivity } from "../../interfaces/CalorieInterfaces";
 import ActivityList from "./ActivityList";
-import { getToken } from "../../services/authService";
 import { getActivitiesForDailyBurn } from "../../services/calorieBurnService";
 import LogActivityModal from "./LogActivityModal";
+import { getValidToken } from "../../store/reducers/user";
+import { useSelector } from "react-redux";
 
 interface CalorieBurnProps {
   dailyBurn: DailyCalorieIntake | null | undefined;
@@ -13,8 +14,8 @@ interface CalorieBurnProps {
   const CalorieBurnView: React.FC<CalorieBurnProps> = ({ dailyBurn, onRefreshIntake }) => {
     const [showModal, setShowModal] = useState(false);
     const [activities, setActivities] = useState<PhysicalActivity[]>([]);
-    const todaysDate = new Date().toDateString();
-    const token = getToken();
+
+    const token = useSelector(getValidToken);
   
     useEffect(() => {
       async function fetchActivities() {
@@ -45,7 +46,6 @@ interface CalorieBurnProps {
     return (
       <div className="bg-gray-100 p-6 min-h-screen">
         <div className="container mx-auto bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-3xl font-bold mb-4">{todaysDate}</h2>
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center mb-4"
             onClick={toggleModal}

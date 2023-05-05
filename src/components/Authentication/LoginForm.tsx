@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { login } from "../../services/authService";
-import { useUserContext } from "../../context/UserContext";
+import { useDispatch} from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { login } from "../../services/authService";
+import { setIsAuthenticated, setToken } from '../../store/reducers/user'; 
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -10,7 +11,7 @@ interface LoginFormProps {
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setIsAuthenticated } = useUserContext();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   async function handleSubmit(event: React.FormEvent) {
@@ -18,7 +19,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     try {
       const token = await login(email, password);
       localStorage.setItem("authToken", token);
-      setIsAuthenticated(true);
+      dispatch(setIsAuthenticated(true));
+      dispatch(setToken(token)); // Dispatch the setToken action from userSlice
       navigate('/');
       onLoginSuccess(); // call the onLoginSuccess function provided by the parent component
     } catch (error) {

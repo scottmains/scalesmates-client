@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { BiLogInCircle } from "react-icons/bi";
-
-import { useUserContext } from "../../context/UserContext";
 import "./Navbar.css";
 import DropdownMenu from "./DropdownMenu";
 import LoginSignupModal from "../Authentication/LoginSignupModal";
-import { useNavigate } from "react-router-dom";
+
 import ProfileDropdownMenu from "./ProfileDrowndownMenu";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 const NavigationBar: React.FC = () => {
-  const { isAuthenticated } = useUserContext();
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated); 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => {

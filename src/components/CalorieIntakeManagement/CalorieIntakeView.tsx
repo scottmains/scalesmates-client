@@ -3,8 +3,10 @@ import { DailyCalorieIntake, Meal } from "../../interfaces/CalorieInterfaces";
 import LogMealModal from "./LogMealModal";
 import MealList from "./MealList";
 import { getMealsForDailyIntake } from "../../services/calorieIntakeService";
-import { getToken } from "../../services/authService";
+
 import { TbSalad } from "react-icons/tb";
+import { getValidToken } from "../../store/reducers/user";
+import { useSelector } from "react-redux";
 
 interface CalorieIntakeProps {
   dailyIntake: DailyCalorieIntake | null | undefined;
@@ -14,8 +16,7 @@ interface CalorieIntakeProps {
 const CalorieIntakeView: React.FC<CalorieIntakeProps> = ({ dailyIntake, onRefreshIntake }) => {
   const [showModal, setShowModal] = useState(false);
   const [meals, setMeals] = useState<Meal[]>([]);
-  const todaysDate = new Date().toDateString();
-  const token = getToken();
+  const token = useSelector(getValidToken);
 
   useEffect(() => {
     async function fetchMeals() {
@@ -46,7 +47,7 @@ const CalorieIntakeView: React.FC<CalorieIntakeProps> = ({ dailyIntake, onRefres
   return (
     <div className="min-h-screen p-6">
       <div className="container mx-auto  p-8 rounded-lg shadow-md">
-        <h2 className="text-3xl font-bold  mb-4">{todaysDate}</h2>
+
         <button
           className="bg-pastel-blue hover:bg-pastel-blue-light text-black border-2 border-black shadow-button font-bold py-2 px-4 rounded inline-flex items-center mb-4"
 

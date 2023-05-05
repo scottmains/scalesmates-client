@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { getToken } from '../../services/authService';
 import { NewMeal, NewPhysicalActivity } from '../../interfaces/CalorieInterfaces';
 import { logActivity } from '../../services/calorieBurnService';
+import { getValidToken } from '../../store/reducers/user';
+import { useSelector } from 'react-redux';
 
 interface LogActivityModalProps {
   onClose: () => void;
@@ -10,7 +11,7 @@ interface LogActivityModalProps {
 }
 
 const LogActivityModal: React.FC<LogActivityModalProps> = ({ onClose, onActivityLogged, dailyCalorieIntakeId }) => {
-  const token = getToken();
+  const token = useSelector(getValidToken);
   const [activityName, setActivityName] = useState<string>();
   const [activityCalories, setActivityCalories] = useState<number>();
   const [activitySteps, setActivitySteps] = useState<number>();

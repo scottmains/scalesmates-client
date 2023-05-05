@@ -1,8 +1,9 @@
 import React from "react";
 import { deleteMeal } from "../../services/calorieIntakeService";
 import { Meal } from "../../interfaces/CalorieInterfaces";
-import { getToken } from "../../services/authService";
 import { MdDelete } from 'react-icons/md';
+import { getValidToken } from "../../store/reducers/user";
+import { useSelector } from "react-redux";
 
 interface MealListProps {
   meals: Meal[];
@@ -11,7 +12,7 @@ interface MealListProps {
 }
 
 const MealList: React.FC<MealListProps> = ({ meals, dailyCalorieIntakeId, onMealDeleted }) => {
-  const token = getToken();
+  const token = useSelector(getValidToken);
 
   const handleDeleteMeal = async (mealId: number) => {
     if (token) {

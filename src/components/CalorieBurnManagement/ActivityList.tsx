@@ -1,9 +1,9 @@
 import React from "react";
-import { deleteMeal } from "../../services/calorieIntakeService";
 import {  PhysicalActivity } from "../../interfaces/CalorieInterfaces";
-import { getToken } from "../../services/authService";
 import { MdDelete } from 'react-icons/md';
 import { deleteActivity } from "../../services/calorieBurnService";
+import { useSelector } from "react-redux";
+import { getValidToken } from "../../store/reducers/user";
 
 interface ActivityListProps {
   activities: PhysicalActivity[];
@@ -12,7 +12,7 @@ interface ActivityListProps {
 }
 
 const ActivityList: React.FC<ActivityListProps> = ({ activities, dailyCalorieBurnId, onActivityDeleted }) => {
-  const token = getToken();
+  const token = useSelector(getValidToken);
 
   const handleDeleteActivity = async (activityId: number) => {
     console.log(dailyCalorieBurnId)

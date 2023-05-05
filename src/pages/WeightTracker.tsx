@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { fetchWeights, deleteWeight, addWeight } from '../services/weightService';
-import { useUserContext } from "../context/UserContext";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery} from 'react-query';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/state';
 import WeightList from '../components/WeightManagement/WeightList';
 import WeightEntry from '../components/WeightManagement/WeightEntry';
 import { WeightRecord } from '../interfaces/WeightInterfaces';
@@ -8,17 +9,18 @@ import { FaWeight } from "react-icons/fa";
 import { useActiveGoals } from '../hooks/useActiveGoals';
 import { weightDifference, percentageDifference } from '../utils/weightHelpers';
 import { WeightCircle } from '../components/WeightManagement/WeightGoalCircle';
-
+import { fetchWeights, deleteWeight, addWeight } from '../services/weightService';
 
 const WeightTracker: React.FC = () => {
-  const { token } = useUserContext();
-  const [weights, setWeights] = useState<WeightRecord[]>([]);
+  const token = useSelector((state: RootState) => state.user.token);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-  const [latestWeightDate, setLatestWeightDate] = useState<Date | null>(null);
   const activeGoal = useActiveGoals(token);
-
+  
+  const { data: weights, refetch } = useQuery<WeightRecord[] | undefined, Error>('weights', () => fetchWeights(token || ''), {
+    enabled: !!token,
+  });
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -28,64 +30,42 @@ const WeightTracker: React.FC = () => {
     setIsModalOpen(false);
     setIsSuccess(false);
   };
-
-  const latestWeight = weights.length > 0 ? weights[0].weight : 0;
+  const latestWeight = weights?.[0]?.weight ?? 0;
   const goalWeight = activeGoal?.goalWeight ?? 0;
-  
-  const weightDiff = weightDifference(latestWeight, goalWeight);
-  const percentDiff = percentageDifference(latestWeight, goalWeight);
+  const weightDiff = useMemo(() => weightDifference(latestWeight, goalWeight), [latestWeight, goalWeight]);
+  const percentDiff = useMemo(() => percentageDifference(latestWeight, goalWeight), [latestWeight, goalWeight]);
 
-
-useEffect(() => {
-  if (!token) return;
-
-  (async () => {
-    try {
-      const fetchedWeights = await fetchWeights(token);
-      setWeights(fetchedWeights);
-
-      if (fetchedWeights.length !== 0) {
-        const latestWeightDate = new Date(fetchedWeights[0].date);
-        setLatestWeightDate(latestWeightDate);
-        console.log(latestWeight);
-
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        setShowNotification(latestWeightDate < oneWeekAgo);
-      }
-    } catch (error) {
-      console.error('Error fetching weights:', error);
-    }
-  })();
-}, [token]);
-
-  const handleDelete = async (id: number) => {
-    if (!token) return;
-    try {
-      await deleteWeight(token, id);
-      setWeights(weights.filter((record) => record.id !== id));
-     
-    } catch (error) {
-      console.error('Error deleting weight:', error);
-    }
-  };
-
-  const handleAddWeight = async (weight: number, date: string) => {
-    try {
-      if (!token) return;
-      await addWeight(token, weight, date);
-      const newWeights = await fetchWeights(token);
-      setWeights(newWeights);
+  const deleteWeightMutation = useMutation((id: number) => deleteWeight(token ?? '', id), {
+    onSuccess: () => {
+      refetch();
+    },
+  });
+  const addWeightMutation = useMutation(({ weight, date }: { weight: number; date: string }) => addWeight(token ?? '', weight, date), {
+    onSuccess: () => {
+      refetch();
       setIsSuccess(true);
       setIsModalOpen(false);
       setTimeout(() => {
         setIsSuccess(false);
       }, 5000);
-    } catch (error) {
-      console.error('Error adding weight:', error);
-    }
-  };
+    },
+  });
+  const handleDelete = useCallback(async (id: number) => {
+    await deleteWeightMutation.mutateAsync(id);
+  }, [deleteWeightMutation]);
 
+  const handleAddWeight = useCallback(async (weight: number, date: string) => {
+    await addWeightMutation.mutateAsync({ weight, date });
+  }, [addWeightMutation]);
+
+  useEffect(() => {
+    if (!weights) return;
+
+    const latestWeightDate = new Date(weights[0].date);
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    setShowNotification(latestWeightDate < oneWeekAgo);
+  }, [weights]);
 
   return (
     <>
@@ -123,7 +103,8 @@ useEffect(() => {
     </div>
     )}
       
-      <WeightList weights={weights} onDelete={handleDelete} />
+      <WeightList weights={weights ?? []} onDelete={handleDelete} />
+
     </>
   );
 };

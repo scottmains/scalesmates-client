@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { addWeightGoal } from "../../services/profileService";
-import { getToken } from '../../services/authService';
+import { getValidToken } from '../../store/reducers/user';
+import { useSelector } from 'react-redux';
+
 
 interface GoalWeightModalProps {
   onClose: () => void;
 }
 
 const GoalWeightModal: React.FC<GoalWeightModalProps> = ({ onClose }) => {
-  const token = getToken();
+  const token = useSelector(getValidToken);
   const [goalWeight, setGoalWeight] = useState<number>();
   const [targetDate, setTargetDate] = useState(new Date().toISOString());
 

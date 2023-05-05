@@ -19,41 +19,43 @@ export async function getAllBurns(token: string): Promise<DailyCalorieBurn[]> {
   return await response.json();
 }
 
-export async function getOrCreateTodaysBurn(token: string): Promise<DailyCalorieBurn> {
-    const response = await fetch(`${API_URL}/CalorieBurn/date`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-  
-    if (!response.ok) {
-      throw new Error("Failed to get or create today's calorie burn");
-    }
-  
-    const data = await response.json();
-    return data as DailyCalorieBurn;
+ 
+export async function getOrCreateDateBurn(token: string, date: Date) {
+  const response = await fetch(`${API_URL}/CalorieBurn/date?date=${date.toISOString().split('T')[0]}`, {
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get or create date calorie intake");
   }
 
-  
-  export async function getCurrentDateBurn(token: string): Promise<DailyCalorieBurn | null> {
-    const response = await fetch(`${API_URL}/CalorieBurn/current`, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-    if (response.status === 204) {
-      return null;
-    }
-  
-    if (!response.ok) {
-      throw new Error(`Failed to get current date burn. Status: ${response.status}, StatusText: ${response.statusText}`);
-    }
-    const burn: DailyCalorieBurn = await response.json();
-    return burn;
+  const data = await response.json();
+  return data as DailyCalorieBurn;
+}
+
+
+export async function getGoogleFitData(token: string, accessToken: string) {
+  const response = await fetch('https://localhost:7255/CalorieBurn/googlefit?accessToken=' + accessToken, {
+     headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+      "Google-Authorization": `Bearer ${accessToken}`,
+    },
+  });
+
+
+  if (!response.ok) {
+    throw new Error("Failed to get or create date calorie intake");
   }
+
+  const data = await response.json();
+  return data;
+}
+
+
 
 export async function logActivity(token: string, activity: NewPhysicalActivity): Promise<PhysicalActivity> {
   const response = await fetch(`${API_URL}/CalorieBurn/logactivity`, {

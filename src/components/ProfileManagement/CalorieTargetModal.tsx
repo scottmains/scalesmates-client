@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { setCalorieTarget } from "../../services/profileService";
-import { getToken } from '../../services/authService';
+import { getValidToken } from '../../store/reducers/user';
+import { useSelector } from 'react-redux';
+
 
 interface CalorieTargetModalProps {
   onClose: () => void;
 }
 
 const CalorieTargetModal: React.FC<CalorieTargetModalProps> = ({ onClose }) => {
-  const token = getToken();
+  const token = useSelector(getValidToken);
   const [target, setTarget] = useState<number>();
 
 

@@ -4,7 +4,8 @@ import WeightTracker from "./pages/WeightTracker";
 import ProfilePage from "./pages/ProfilePage";
 import HomePage from "./pages/HomePage";
 import Navbar from './components/Common/Navbar';
-import { useUserContext } from './context/UserContext';
+import { useSelector } from 'react-redux'; // Import useSelector from react-redux
+import { RootState } from './store'; // Import RootState from your store
 import "./App.css";
 import CalorieTracker from './pages/CalorieTracker';
 
@@ -13,7 +14,8 @@ interface AuthWrapperProps {
 }
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const { isAuthenticated } = useUserContext();
+  // Replace the useUserContext() with useSelector
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const location = useLocation();
 
   return isAuthenticated ? (
