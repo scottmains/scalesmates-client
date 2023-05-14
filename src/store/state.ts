@@ -1,5 +1,4 @@
 // src/store/state.ts
-// src/store/state.ts
 export interface RootState {
   googleAuth: {
     accessToken: string | null;
@@ -8,4 +7,9 @@ export interface RootState {
     isAuthenticated: boolean;
     token: string | null;
   };
+  calorieTracker: {
+    burnCalories: number;
+    intakeCalories: number;
+  };
 }
+

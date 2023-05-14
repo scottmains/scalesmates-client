@@ -1,47 +1,49 @@
-import { useState, useEffect } from "react";
-import { DailyCalorieIntake, PhysicalActivity } from "../../interfaces/CalorieInterfaces";
+import { useEffect, useState } from "react";
+import { DailyCalorieIntake } from "../../interfaces/CalorieInterfaces";
 import ActivityList from "./ActivityList";
 import { getActivitiesForDailyBurn } from "../../services/calorieBurnService";
 import LogActivityModal from "./LogActivityModal";
-import { getValidToken } from "../../store/reducers/user";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useQuery } from "react-query";
+import { RootState } from "../../store";
+import { setBurnCalories } from "../../store/reducers/calorieTracker";
 
 interface CalorieBurnProps {
   dailyBurn: DailyCalorieIntake | null | undefined;
-  onRefreshIntake?: () => void;
 }
 
-  const CalorieBurnView: React.FC<CalorieBurnProps> = ({ dailyBurn, onRefreshIntake }) => {
+  const CalorieBurnView: React.FC<CalorieBurnProps> = ({ dailyBurn}) => {
     const [showModal, setShowModal] = useState(false);
-    const [activities, setActivities] = useState<PhysicalActivity[]>([]);
-
-    const token = useSelector(getValidToken);
-  
-    useEffect(() => {
-      async function fetchActivities() {
-        if (dailyBurn && token) {
-          const fetchedActivities = await getActivitiesForDailyBurn(token, dailyBurn.id);
-          setActivities(fetchedActivities);
-        }
-      }
-      fetchActivities();
-    }, [dailyBurn, token]);
+    const dispatch = useDispatch();
+    const token = useSelector((state: RootState) => state.user.token) || "";
+    const burnCalories = useSelector(
+      (state: RootState) => state.calorieTracker.burnCalories
+    );
+    const activitiesQuery = useQuery(["activities", token, dailyBurn?.id], () =>
+    getActivitiesForDailyBurn(token, dailyBurn?.id || 0)
+  );
   
     const toggleModal = () => {
       setShowModal(!showModal);
     };
   
     const onActivityLogged = () => {
-      if (onRefreshIntake) {
-        onRefreshIntake();
-      }
+      activitiesQuery.refetch();
     };
   
     const onActivityDeleted = () => {
-      if (onRefreshIntake) {
-        onRefreshIntake();
-      }
+      activitiesQuery.refetch();
     };
+
+    useEffect(() => {
+      if (activitiesQuery.data) {
+        const newTotalCalories = activitiesQuery.data.reduce(
+          (total, meal) => total + meal.calories,
+          0
+        );
+        dispatch(setBurnCalories(newTotalCalories));
+      }
+    }, [activitiesQuery.data]);
   
     return (
       <div className="bg-gray-100 p-6 min-h-screen">
@@ -54,7 +56,7 @@ interface CalorieBurnProps {
           </button>
           {dailyBurn ? (
             <>
-              <p className="text-xl mb-4">Total Burned: {dailyBurn.totalCalories} calories</p>
+              <p className="text-xl mb-4">Total Burned: {burnCalories} calories</p>
               {showModal && (
                 <LogActivityModal
                   onClose={toggleModal}
@@ -63,7 +65,7 @@ interface CalorieBurnProps {
                 />
               )}
               <ActivityList
-                activities={activities}
+                activities={activitiesQuery.data || []}
                 dailyCalorieBurnId={dailyBurn.id}
                 onActivityDeleted={onActivityDeleted}
               />

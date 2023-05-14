@@ -1,86 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import CalorieIntakeView from "../components/CalorieIntakeManagement/CalorieIntakeView";
 import CalorieBurnView from "../components/CalorieBurnManagement/CalorieBurnView";
-import {  getOrCreateDateIntake} from "../services/calorieIntakeService";
-import { getGoogleFitData, getOrCreateDateBurn } from "../services/calorieBurnService";
-import { DailyCalorieBurn, DailyCalorieIntake } from "../interfaces/CalorieInterfaces";
+import { useQuery } from "react-query";
+import { getOrCreateDateIntake } from "../services/calorieIntakeService";
+import { getOrCreateDateBurn } from "../services/calorieBurnService";
 import { useActiveCalorieTarget } from "../hooks/useActiveCalorieTarget";
+import { useGoogleFitData } from "../hooks/useGoogleFitData";
 import DatePicker from "react-datepicker";
-
 import "react-datepicker/dist/react-datepicker.css";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import { DailyCalorieBurn, DailyCalorieIntake } from "../interfaces/CalorieInterfaces";
+
 const CalorieTracker: React.FC = () => {
-  const token = useSelector((state: RootState) => state.user.token);
+  const token = useSelector((state: RootState) => state.user.token) || "";
   const [activeView, setActiveView] = useState("intake");
-  const [selectedDateIntake, setSelectedDateIntake] = useState<DailyCalorieIntake | null>();
-  const [selectedDateBurn, setSelectedDateBurn] = useState<DailyCalorieBurn | null>();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const calorieTarget = useActiveCalorieTarget(token);
-  const [netCalories, setNetCalories] = useState<number>(0);
   const accessToken = useSelector((state: RootState) => state.googleAuth.accessToken);
 
-  const fetchAndSetData = async () => {
-    if (token) {
-      const [intakeData, burnData] = await Promise.all([
-        getOrCreateDateIntake(token, selectedDate),
-        getOrCreateDateBurn(token, selectedDate),
-        
-      ]);
-      if(accessToken)
-      {
-        getGoogleFitData(token, accessToken)
-      }
+  const intakeQuery = useQuery<DailyCalorieIntake, Error>(["intakeData", token, selectedDate], () =>
+  getOrCreateDateIntake(token, selectedDate)
+  );
 
-      setSelectedDateIntake(intakeData);
-      setSelectedDateBurn(burnData);
+  const burnQuery = useQuery<DailyCalorieBurn, Error>(["burnData", token, selectedDate], () =>
+  getOrCreateDateBurn(token, selectedDate)
+  );
+
+  useGoogleFitData(token, accessToken);
+
+  const netCalories = useMemo(() => {
+    if (intakeQuery.data && burnQuery.data) {
+      return Math.max(intakeQuery.data.totalCalories - burnQuery.data.totalCalories, 0);
     }
-  }
-
-  useEffect(() => {
-    fetchAndSetData();
-    
-  }, [token, selectedDate]);
-  
-
-  useEffect(() => {
-    if (selectedDateIntake && selectedDateBurn) {
-      const newNetCalories =
-        (selectedDateIntake.totalCalories || 0) -
-        (selectedDateBurn.totalCalories || 0);
-      setNetCalories(Math.max(newNetCalories, 0));
-    }
-  }, [selectedDateIntake, selectedDateBurn]);
+    return 0;
+  }, [intakeQuery.data, burnQuery.data]);
 
   const remainingCalories = (calorieTarget?.targetCalories ?? 0) - netCalories;
-
-
-  const refreshCurrentDateIntake = async () => {
-    if (token) {
-      try {
-        const currentDateIntake = await getOrCreateDateIntake(token, selectedDate);
-        setSelectedDateIntake(currentDateIntake);
-      } catch (error) {
-        console.error("Failed to refresh Calorie Intake", error);
-      }
-    }
-  };
-
-  const refreshCurrentDateBurn = async () => {
-    if (token) {
-      try {
-        const currentDateIntake = await getOrCreateDateBurn(token, selectedDate);
-        setSelectedDateIntake(currentDateIntake);
-      } catch (error) {
-        console.error("Failed to refresh Calorie Intake", error);
-      }
-    }
-  };
 
   const handleDateChange = (newDate: Date) => {
     setSelectedDate(newDate);
   };
-
 
 
   return (
@@ -103,14 +63,14 @@ const CalorieTracker: React.FC = () => {
  
       <div>
       {calorieTarget && (
-        <div className="bg-gradient-to-br from-pastel-blue-light via-pastel-purple-light to-pastel-pink-light p-6 rounded-lg shadow-black border-2 border-black">
-          <p className="text-2xl font-semibold">
-            You are {remainingCalories} calories{" "}
-            {remainingCalories >= 0 ? "under" : "over"} your target of{" "}
-            {calorieTarget.targetCalories}.
-          </p>
-        </div>
-      )}
+          <div className="bg-gradient-to-br from-pastel-blue-light via-pastel-purple-light to-pastel-pink-light p-6 rounded-lg shadow-black border-2 border-black">
+            <p className="text-2xl font-semibold">
+              You are {remainingCalories} calories{" "}
+              {remainingCalories >= 0 ? "under" : "over"} your target of{" "}
+              {calorieTarget.targetCalories}.
+            </p>
+          </div>
+        )}
     </div>
     <div className="mt-4 text-center">
           <button
@@ -130,10 +90,12 @@ const CalorieTracker: React.FC = () => {
             Calorie Burn
           </button>
         </div>
-      {activeView === "intake" && (
-        <CalorieIntakeView dailyIntake={selectedDateIntake} onRefreshIntake={refreshCurrentDateIntake} />
+        {activeView === "intake" && (
+        <CalorieIntakeView dailyIntake={intakeQuery.data} />
       )}
-      {activeView === "burn" && <CalorieBurnView dailyBurn={selectedDateBurn} onRefreshIntake={refreshCurrentDateBurn}/>}
+      {activeView === "burn" && (
+        <CalorieBurnView dailyBurn={burnQuery.data} />
+      )}
     </div>
   );
 };

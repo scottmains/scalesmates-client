@@ -13,7 +13,7 @@ const API_URL = "https://localhost:7255";
     }
   }
   
-  export async function login(email: string, password: string): Promise<string> {
+  export async function login({ email, password }: { email: string; password: string }): Promise<string> {
     const response = await fetch(`${API_URL}/account/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -77,6 +77,14 @@ const DropdownMenu: React.FC<DropdownMenuProps> = () => {
             Calorie Tracker
           </NavLink>
         </motion.li>
+        <motion.li variants={itemVariants}>
+          <NavLink
+            to="/workout-tracker"
+            className="transition-colors duration-300 ease-in-out hover:bg-gray-200 hover:text-white px-3 py-2 rounded"
+          >
+            Workout Tracker
+          </NavLink>
+        </motion.li>
         </motion.ul>
       </motion.div>
     </div> 

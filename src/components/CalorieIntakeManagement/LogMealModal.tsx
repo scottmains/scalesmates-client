@@ -6,9 +6,10 @@ import { useSelector } from 'react-redux';
 
 interface LogMealModalProps {
   onClose: () => void;
-  onMealLogged: () => void;
+  onMealLogged: (calories: number) => void;
   dailyCalorieIntakeId: number;
 }
+
 
 const LogMealModal: React.FC<LogMealModalProps> = ({ onClose, onMealLogged, dailyCalorieIntakeId }) => {
   const token = useSelector(getValidToken);
@@ -22,10 +23,10 @@ const LogMealModal: React.FC<LogMealModalProps> = ({ onClose, onMealLogged, dail
       const meal: NewMeal = {
         dailyCalorieIntakeId: dailyCalorieIntakeId,
         name: mealName,
-        calories: mealCalories,  
+        calories: mealCalories,
       };
       await logMeal(token, meal);
-      onMealLogged(); // Trigger data refetching
+      onMealLogged(mealCalories); 
       onClose();
     } catch (error) {
       console.error("Error adding meal:", error);

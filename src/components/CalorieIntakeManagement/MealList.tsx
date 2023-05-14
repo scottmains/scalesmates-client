@@ -8,16 +8,16 @@ import { useSelector } from "react-redux";
 interface MealListProps {
   meals: Meal[];
   dailyCalorieIntakeId: number;
-  onMealDeleted: () => void;
+  onMealDeleted: (calories: number) => void;
 }
 
 const MealList: React.FC<MealListProps> = ({ meals, dailyCalorieIntakeId, onMealDeleted }) => {
   const token = useSelector(getValidToken);
 
-  const handleDeleteMeal = async (mealId: number) => {
+  const handleDeleteMeal = async (mealId: number, calories: number) => {
     if (token) {
       await deleteMeal(token, mealId, dailyCalorieIntakeId);
-      onMealDeleted();
+      onMealDeleted(calories);
     }
   };
 
@@ -31,9 +31,9 @@ const MealList: React.FC<MealListProps> = ({ meals, dailyCalorieIntakeId, onMeal
               <span className="font-bold">{meal.name}</span> - {meal.calories} calories
             </div>
             <button
-              className="bg-pastel-pink hover:bg-pastel-pink-dark text-white font-bold py-1 px-2 rounded inline-flex items-center"
-              onClick={() => handleDeleteMeal(meal.id)}
-            >
+            className="bg-pastel-pink hover:bg-pastel-pink-dark text-white font-bold py-1 px-2 rounded inline-flex items-center"
+            onClick={() => handleDeleteMeal(meal.id, meal.calories)}
+          >
               <MdDelete />
             </button>
           </li>

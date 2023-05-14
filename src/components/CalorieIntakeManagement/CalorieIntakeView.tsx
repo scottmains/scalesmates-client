@@ -1,56 +1,57 @@
-import { useState, useEffect } from "react";
-import { DailyCalorieIntake, Meal } from "../../interfaces/CalorieInterfaces";
+import React, { useEffect, useState } from "react";
+import { DailyCalorieIntake } from "../../interfaces/CalorieInterfaces";
 import LogMealModal from "./LogMealModal";
 import MealList from "./MealList";
 import { getMealsForDailyIntake } from "../../services/calorieIntakeService";
-
 import { TbSalad } from "react-icons/tb";
-import { getValidToken } from "../../store/reducers/user";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useQuery } from "react-query";
+import { RootState } from "../../store";
+import { setIntakeCalories } from "../../store/reducers/calorieTracker";
 
 interface CalorieIntakeProps {
   dailyIntake: DailyCalorieIntake | null | undefined;
-  onRefreshIntake?: () => void;
 }
 
-const CalorieIntakeView: React.FC<CalorieIntakeProps> = ({ dailyIntake, onRefreshIntake }) => {
+const CalorieIntakeView: React.FC<CalorieIntakeProps> = ({ dailyIntake }) => {
   const [showModal, setShowModal] = useState(false);
-  const [meals, setMeals] = useState<Meal[]>([]);
-  const token = useSelector(getValidToken);
+  const intakeCalories = useSelector(
+    (state: RootState) => state.calorieTracker.intakeCalories
+  );
+  const dispatch = useDispatch();
+  const token = useSelector((state: RootState) => state.user.token) || "";
 
-  useEffect(() => {
-    async function fetchMeals() {
-      if (dailyIntake && token) {
-        const fetchedMeals = await getMealsForDailyIntake(token, dailyIntake.id);
-        setMeals(fetchedMeals);
-      }
-    }
-    fetchMeals();
-  }, [dailyIntake, token]);
+  const mealsQuery = useQuery(["meals", token, dailyIntake?.id], () =>
+    getMealsForDailyIntake(token, dailyIntake?.id || 0)
+  );
 
   const toggleModal = () => {
     setShowModal(!showModal);
   };
 
   const onMealLogged = () => {
-    if (onRefreshIntake) {
-      onRefreshIntake();
-    }
+    mealsQuery.refetch();
   };
 
   const onMealDeleted = () => {
-    if (onRefreshIntake) {
-      onRefreshIntake();
-    }
+    mealsQuery.refetch();
   };
+
+  useEffect(() => {
+    if (mealsQuery.data) {
+      const newTotalCalories = mealsQuery.data.reduce(
+        (total, meal) => total + meal.calories,
+        0
+      );
+      dispatch(setIntakeCalories(newTotalCalories));
+    }
+  }, [mealsQuery.data]);
 
   return (
     <div className="min-h-screen p-6">
-      <div className="container mx-auto  p-8 rounded-lg shadow-md">
-
+      <div className="container mx-auto p-8 rounded-lg shadow-md">
         <button
           className="bg-pastel-blue hover:bg-pastel-blue-light text-black border-2 border-black shadow-button font-bold py-2 px-4 rounded inline-flex items-center mb-4"
-
           onClick={toggleModal}
         >
           <TbSalad className="mr-2" />
@@ -58,7 +59,7 @@ const CalorieIntakeView: React.FC<CalorieIntakeProps> = ({ dailyIntake, onRefres
         </button>
         {dailyIntake ? (
           <>
-            <p className="text-xl  mb-4">Total Intake: {dailyIntake.totalCalories} calories</p>
+            <p className="text-xl mb-4">Total Intake: {intakeCalories} calories</p>
             {showModal && (
               <LogMealModal
                 onClose={toggleModal}
@@ -67,7 +68,7 @@ const CalorieIntakeView: React.FC<CalorieIntakeProps> = ({ dailyIntake, onRefres
               />
             )}
             <MealList
-              meals={meals}
+              meals={mealsQuery.data || []}
               dailyCalorieIntakeId={dailyIntake.id}
               onMealDeleted={onMealDeleted}
             />

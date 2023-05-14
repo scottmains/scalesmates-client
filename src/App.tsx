@@ -8,13 +8,14 @@ import { useSelector } from 'react-redux'; // Import useSelector from react-redu
 import { RootState } from './store'; // Import RootState from your store
 import "./App.css";
 import CalorieTracker from './pages/CalorieTracker';
+import WorkoutTracker from './pages/WorkoutTracker';
 
 interface AuthWrapperProps {
   children: ReactNode;
 }
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  // Replace the useUserContext() with useSelector
+
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const location = useLocation();
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/weight-tracker" element={<AuthWrapper><WeightTracker /></AuthWrapper>} />
           <Route path="/calorie-tracker" element={<AuthWrapper><CalorieTracker/></AuthWrapper>} />
+          <Route path="/workout-tracker" element={<AuthWrapper><WorkoutTracker/></AuthWrapper>} />
           <Route path="/profile" element={<AuthWrapper><ProfilePage /></AuthWrapper>} />
         </Routes>
       </div>

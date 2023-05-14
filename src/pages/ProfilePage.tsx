@@ -24,8 +24,6 @@ const ProfilePage: React.FC = () => {
   const activeGoal = useActiveGoals(token);
   const activeCalorieTarget = useActiveCalorieTarget(token);
 
-
-
   useEffect(() => {
     // Load the Google API Client and initialize it with your API credentials
     window.google.accounts.id.initialize({
@@ -44,11 +42,6 @@ const ProfilePage: React.FC = () => {
     dispatch(setGoogleAccessToken(response.credential));
     
   };
-  
-
-  
-  
-  
   
   return (
     <>
